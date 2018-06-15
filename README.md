@@ -14,4 +14,4 @@ You can then scaffold out a new Lumberjack/Bedrock site using:
 lumberjack-bedrock new my-site
 ```
 
-The above command will create a folder in your current directory called `my-site` which contains the scaffolded out site.
+The above command will create a folder in your current directory called `my-site` which contains Bedrock with Lumberjack ready to go.
