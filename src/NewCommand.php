@@ -79,7 +79,9 @@ class NewCommand extends Command
 
         $process = new Process(implode(' && ', $commands));
 
-        $process->run();
+        $process->run(function ($type, $buffer) {
+            $this->output->write($buffer);
+        });
 
         if (!$process->isSuccessful()) {
             throw new ProcessFailedException($process);
