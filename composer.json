@@ -1,0 +1,16 @@
+{
+    "name": "rareloop/lumberjack-bedrock-installer",
+    "require": {
+        "php": "^7.1.3",
+        "symfony/console": "^4.1",
+        "symfony/process": "^4.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Rareloop\\Lumberjack\\Installer\\": "src"
+        }
+    },
+    "bin": [
+        "lumberjack-bedrock"
+    ]
+}
