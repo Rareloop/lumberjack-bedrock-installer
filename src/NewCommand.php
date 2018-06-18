@@ -15,6 +15,7 @@ class NewCommand extends Command
     protected $escapedProjectPath;
     protected $output;
     protected $defaultFolderName = 'lumberjack-bedrock-site';
+    protected $themeDirectory;
 
     protected function configure()
     {
@@ -35,6 +36,8 @@ class NewCommand extends Command
 
         $this->projectPath = getcwd().'/'.$projectFolderName;
         $this->escapedProjectPath = escapeshellarg($this->projectPath);
+
+        $this->themeDirectory = $this->projectPath.'/web/app/themes/lumberjack';
 
         if (file_exists($this->projectPath)) {
             $output->writeln('<error>Can\'t install to: '.$this->projectPath.'. The directory already exists</error>');
@@ -61,7 +64,7 @@ class NewCommand extends Command
     {
         $this->output->writeln('<info>Checking out Bedrock</info>');
 
-        $this->cloneGitRepository('git@github.com:roots/bedrock.git', $this->escapedProjectPath);
+        $this->cloneGitRepository('git@github.com:roots/bedrock.git', $this->projectPath);
     }
 
     protected function installComposerDependencies()
@@ -95,15 +98,13 @@ class NewCommand extends Command
     {
         $this->output->writeln('<info>Adding Lumberjack theme</info>');
 
-        $themeDirectory = escapeshellarg($this->projectPath.'/web/app/themes/lumberjack');
-
-        $this->cloneGitRepository('git@github.com:rareloop/lumberjack.git', $themeDirectory);
+        $this->cloneGitRepository('git@github.com:rareloop/lumberjack.git', $this->themeDirectory);
     }
 
     protected function cloneGitRepository($gitRepo, $filePath)
     {
         $commands = [
-            'git clone --depth=1 ' . $gitRepo . ' '.$filePath,
+            'git clone --depth=1 ' . escapeshellarg($gitRepo) . ' '.escapeshellarg($filePath),
             'rm -rf '.$filePath.'/.git',
         ];
 
