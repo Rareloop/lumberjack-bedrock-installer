@@ -54,6 +54,7 @@ class NewCommand extends Command
         $this->installComposerDependencies();
         $this->checkoutLatestLumberjackTheme();
         $this->addAdditionalDotEnvKeys();
+        $this->registerServiceProviders();
     }
 
     protected function checkoutLatestBedrock()
@@ -132,5 +133,28 @@ class NewCommand extends Command
             "\n",
             'APP_KEY=',
         ];
+    }
+
+    protected function registerServiceProviders()
+    {
+        $providers = $this->getServiceProviders();
+
+        if (empty($providers)) {
+            return;
+        }
+
+        $this->output->writeln('<info>Registering ServiceProviders</info>');
+
+        $configPath = $this->projectPath . '/web/app/themes/lumberjack/config/app.php';
+
+        $appConfig = file_get_contents($configPath);
+        $appConfig = str_replace("'providers' => [", "'providers' => [\n\t\t" . implode(",\n\t\t", $providers) . ",\n", $appConfig);
+
+        file_put_contents($configPath, $appConfig);
+    }
+
+    protected function getServiceProviders()
+    {
+        return [];
     }
 }
