@@ -14,6 +14,7 @@ class NewCommand extends Command
     protected $projectPath;
     protected $escapedProjectPath;
     protected $output;
+    protected $defaultFolderName = 'lumberjack-bedrock-site';
 
     protected function configure()
     {
@@ -22,7 +23,7 @@ class NewCommand extends Command
         $this->addArgument(
             'name',
             InputArgument::OPTIONAL,
-            'The name of the folder to create (defaults to `lumberjack-bedrock-site`)'
+            'The name of the folder to create (defaults to `' . $this->defaultFolderName .'`)'
         );
     }
 
@@ -30,7 +31,7 @@ class NewCommand extends Command
     {
         $this->output = $output;
 
-        $projectFolderName = $input->getArgument('name') ?? 'lumberjack-bedrock-site';
+        $projectFolderName = $input->getArgument('name') ?? $this->defaultFolderName;
 
         $this->projectPath = getcwd().'/'.$projectFolderName;
         $this->escapedProjectPath = escapeshellarg($this->projectPath);
@@ -41,31 +42,25 @@ class NewCommand extends Command
         }
 
         try {
-            $this->checkoutLatestBedrock();
-            $this->installComposerDependencies();
-            $this->checkoutLatestLumberjackTheme();
-            $this->addAdditionalDotEnvKeys();
+            $this->install($input, $output);
         } catch (\Exception $e) {
             $output->writeln('<error>Install failed</error>');
         }
+    }
+
+    protected function install(InputInterface $input, OutputInterface $output)
+    {
+        $this->checkoutLatestBedrock();
+        $this->installComposerDependencies();
+        $this->checkoutLatestLumberjackTheme();
+        $this->addAdditionalDotEnvKeys();
     }
 
     protected function checkoutLatestBedrock()
     {
         $this->output->writeln('<info>Checking out Bedrock</info>');
 
-        $commands = [
-            'git clone --depth=1 git@github.com:roots/bedrock.git '.$this->escapedProjectPath,
-            'rm -rf '.$this->escapedProjectPath.'/.git',
-        ];
-
-        $process = new Process(implode(' && ', $commands));
-
-        $process->run();
-
-        if (!$process->isSuccessful()) {
-            throw new ProcessFailedException($process);
-        }
+        $this->cloneGitRepository('git@github.com:roots/bedrock.git', $this->escapedProjectPath);
     }
 
     protected function installComposerDependencies()
@@ -101,9 +96,14 @@ class NewCommand extends Command
 
         $themeDirectory = escapeshellarg($this->projectPath.'/web/app/themes/lumberjack');
 
+        $this->cloneGitRepository('git@github.com:rareloop/lumberjack.git', $themeDirectory);
+    }
+
+    protected function cloneGitRepository($gitRepo, $filePath)
+    {
         $commands = [
-            'git clone --depth=1 git@github.com:rareloop/lumberjack.git '.$themeDirectory,
-            'rm -rf '.$themeDirectory.'/.git',
+            'git clone --depth=1 ' . $gitRepo . ' '.$filePath,
+            'rm -rf '.$filePath.'/.git',
         ];
 
         $process = new Process(implode(' && ', $commands));
