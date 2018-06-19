@@ -57,7 +57,6 @@ class NewCommand extends Command
         try {
             $this->install();
         } catch (Exception $e) {
-            throw $e;
             $output->writeln('<error>Install failed</error>');
         }
     }
