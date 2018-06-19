@@ -62,6 +62,14 @@ class NewCommand extends Command
         $this->checkoutLatestLumberjackTheme();
         $this->addAdditionalDotEnvKeys();
         $this->registerServiceProviders();
+        $this->removeGithubFolder();
+    }
+
+    protected function removeGithubFolder()
+    {
+        $this->runCommands([
+            'rm -rf ' . $this->escapedProjectPath . '/.github',
+        ]);
     }
 
     protected function getDotEnvLines() : array
