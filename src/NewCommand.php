@@ -15,7 +15,6 @@ use Symfony\Component\Process\Exception\ProcessFailedException;
 class NewCommand extends Command
 {
     protected $projectPath;
-    protected $escapedProjectPath;
     protected $output;
     protected $defaultFolderName = 'lumberjack-bedrock-site';
     protected $themeDirectory;
@@ -39,7 +38,6 @@ class NewCommand extends Command
         $projectFolderName = $input->getArgument('name') ?? $this->defaultFolderName;
 
         $this->projectPath = getcwd() . '/' . $projectFolderName;
-        $this->escapedProjectPath = escapeshellarg($this->projectPath);
 
         $this->themeDirectory = $this->projectPath . '/web/app/themes/lumberjack';
 
@@ -68,7 +66,7 @@ class NewCommand extends Command
     protected function removeGithubFolder()
     {
         $this->runCommands([
-            'rm -rf ' . $this->escapedProjectPath . '/.github',
+            'rm -rf ' . escapeshellarg($this->projectPath . '/.github'),
         ]);
     }
 
@@ -104,7 +102,7 @@ class NewCommand extends Command
         $this->output->writeln('<info>Installing Composer Dependencies</info>');
 
         $commands = [
-            'cd ' . $this->escapedProjectPath,
+            'cd ' . escapeshellarg($this->projectPath),
             'composer require ' . implode(' ', $this->getComposerDependencies()),
         ];
 
@@ -124,7 +122,7 @@ class NewCommand extends Command
     {
         $this->runCommands([
             'git clone --depth=1 ' . escapeshellarg($gitRepo) . ' ' . escapeshellarg($filePath),
-            'rm -rf ' . $filePath . '/.git',
+            'rm -rf ' . escapeshellarg($filePath . '/.git'),
         ]);
     }
 
