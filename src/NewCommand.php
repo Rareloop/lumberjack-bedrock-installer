@@ -4,13 +4,10 @@ namespace Rareloop\Lumberjack\Installer;
 
 use Exception;
 use Symfony\Component\Process\Process;
-use Symfony\Component\Process\InputStream;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Process\Exception\ProcessFailedException;
 
 class NewCommand extends Command
 {
@@ -50,6 +47,10 @@ class NewCommand extends Command
             $this->install();
         } catch (Exception $e) {
             $output->writeln('<error>Install failed</error>');
+            $output->writeln('<error>' . get_class($e) . ': ' . $e->getMessage() . '</error>');
+
+            // print in debug mode -vvv
+            $output->writeln($e->getTraceAsString(), OutputInterface::VERBOSITY_DEBUG);
         }
     }
 
@@ -107,7 +108,8 @@ class NewCommand extends Command
         ];
 
         $this->runCommands($commands, function ($type, $buffer) {
-            $this->output->write($buffer);
+            // print when in verbose mode -v
+            $this->output->write($buffer, OutputInterface::VERBOSITY_VERBOSE);
         });
     }
 
@@ -157,6 +159,11 @@ class NewCommand extends Command
 
     protected function runCommands(array $commands, callable $callback = null)
     {
+        foreach ($commands as $command) {
+            // print when in debug mode -vvv
+            $this->output->writeln('<comment>' . $command . '</comment>', OutputInterface::VERBOSITY_DEBUG);
+        }
+
         $process = new Process(implode(' && ', $commands));
 
         return $process->mustRun($callback);
