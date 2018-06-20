@@ -88,8 +88,14 @@ class NewCommand extends Command
 
     protected function getComposerDependencies() : array
     {
+        $version = null;
+
+        if ($this->input->getOption('dev')) {
+            $version = ':dev-master';
+        }
+
         return [
-            'rareloop/lumberjack-core',
+            'rareloop/lumberjack-core' . $version,
         ];
     }
 
