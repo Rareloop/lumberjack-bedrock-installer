@@ -3,27 +3,44 @@
 namespace Rareloop\Lumberjack\Installer;
 
 use Exception;
-use Symfony\Component\Process\Process;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Process\Process;
 
 class NewCommand extends Command
 {
+    protected $rootPath;
     protected $projectPath;
+    protected $trellisPath;
+
+    protected $input;
     protected $output;
+
     protected $defaultFolderName = 'lumberjack-bedrock-site';
     protected $themeDirectory;
 
+    protected $name = 'new';
+    protected $description = 'Create a new Lumberjack project built on Bedrock';
+
     protected function configure()
     {
-        $this->setName('new');
-        $this->setDescription('Create a new Lumberjack project built on Bedrock');
+        $this->setName($this->name);
+        $this->setDescription($this->description);
+
         $this->addArgument(
             'name',
             InputArgument::OPTIONAL,
             'The name of the folder to create (defaults to `' . $this->defaultFolderName . '`)'
+        );
+
+        $this->addOption(
+            '--with-trellis',
+            null,
+            InputOption::VALUE_NONE,
+            'Also install Trellis for deployment'
         );
     }
 
@@ -34,7 +51,13 @@ class NewCommand extends Command
 
         $projectFolderName = $input->getArgument('name') ?? $this->defaultFolderName;
 
+        $this->rootPath = getcwd() . '/' . $projectFolderName;
         $this->projectPath = getcwd() . '/' . $projectFolderName;
+
+        if ($input->getOption('with-trellis')) {
+            $this->projectPath = $this->rootPath . '/site';
+            $this->trellisPath = $this->rootPath . '/trellis';
+        }
 
         $this->themeDirectory = $this->projectPath . '/web/app/themes/lumberjack';
 
@@ -57,6 +80,11 @@ class NewCommand extends Command
     protected function install()
     {
         $this->checkoutLatestBedrock();
+
+        if ($this->input->getOption('with-trellis')) {
+            $this->checkoutLatestTrellis();
+        }
+
         $this->installComposerDependencies();
         $this->checkoutLatestLumberjackTheme();
         $this->addAdditionalDotEnvKeys();
@@ -96,6 +124,13 @@ class NewCommand extends Command
         $this->output->writeln('<info>Checking out Bedrock</info>');
 
         $this->cloneGitRepository('git@github.com:roots/bedrock.git', $this->projectPath);
+    }
+
+    protected function checkoutLatestTrellis()
+    {
+        $this->output->writeln('<info>Checking out Trellis</info>');
+
+        $this->cloneGitRepository('git@github.com:roots/trellis.git', $this->trellisPath);
     }
 
     protected function installComposerDependencies()
