@@ -12,6 +12,9 @@ use Symfony\Component\Process\Process;
 
 class NewCommand extends Command
 {
+    protected $installHatchet = false;
+    protected $installTrellis = false;
+
     protected $rootPath;
     protected $projectPath;
     protected $trellisPath;
@@ -42,6 +45,13 @@ class NewCommand extends Command
             InputOption::VALUE_NONE,
             'Also install Trellis for deployment'
         );
+
+        $this->addOption(
+            '--with-hatchet',
+            null,
+            InputOption::VALUE_NONE,
+            'Also install Hatchet CLI'
+        );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -54,7 +64,10 @@ class NewCommand extends Command
         $this->rootPath = getcwd() . '/' . $projectFolderName;
         $this->projectPath = getcwd() . '/' . $projectFolderName;
 
-        if ($input->getOption('with-trellis')) {
+        $this->installHatchet |= $input->getOption('with-hatchet');
+        $this->installTrellis |= $input->getOption('with-trellis');
+
+        if ($this->installTrellis) {
             $this->projectPath = $this->rootPath . '/site';
             $this->trellisPath = $this->rootPath . '/trellis';
         }
@@ -81,7 +94,7 @@ class NewCommand extends Command
     {
         $this->checkoutLatestBedrock();
 
-        if ($this->input->getOption('with-trellis')) {
+        if ($this->installTrellis) {
             $this->checkoutLatestTrellis();
         }
 
@@ -90,6 +103,18 @@ class NewCommand extends Command
         $this->addAdditionalDotEnvKeys();
         $this->registerServiceProviders();
         $this->removeGithubFolder();
+
+        if ($this->installHatchet) {
+            $this->copyHatchetScript();
+        }
+    }
+
+    protected function copyHatchetScript() {
+        $this->output->writeln('<info>Install Hatchet CLI</info>');
+
+        $this->runCommands([
+            'cp ' . escapeshellarg($this->projectPath . '/vendor/rareloop/hatchet/hatchet') . ' ' . escapeshellarg($this->themeDirectory . '/'),
+        ]);
     }
 
     protected function removeGithubFolder()
@@ -109,9 +134,15 @@ class NewCommand extends Command
 
     protected function getComposerDependencies() : array
     {
-        return [
+        $dependencies = [
             'rareloop/lumberjack-core',
         ];
+
+        if ($this->installHatchet) {
+            $dependencies[] = 'rareloop/hatchet:dev-master@dev';
+        }
+
+        return $dependencies;
     }
 
     protected function getServiceProviders() : array
