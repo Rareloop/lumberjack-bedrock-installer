@@ -218,7 +218,13 @@ class NewCommand extends Command
         $configPath = $this->projectPath . '/web/app/themes/lumberjack/config/app.php';
 
         $appConfig = file_get_contents($configPath);
-        $appConfig = str_replace("'providers' => [", "'providers' => [\n\t\t" . implode(",\n\t\t", $providers) . ",\n", $appConfig);
+
+        preg_match("/'providers' => \[.*?\]/s", $appConfig, $matches);
+        $providersConfig = $matches[0];
+        preg_match_all('/[A-Za-z0-9\_\\\]+\:\:class/', $appConfig, $currentProviders);
+        $lastProvider = $currentProviders[0][count($currentProviders[0]) - 1];
+        $newProvidersConfig = str_replace($lastProvider, $lastProvider . ",\n        " . implode(",\n        ", $providers), $providersConfig);
+        $appConfig = str_replace($providersConfig, $newProvidersConfig, $appConfig);
 
         file_put_contents($configPath, $appConfig);
     }
