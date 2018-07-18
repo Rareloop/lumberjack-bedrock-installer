@@ -19,6 +19,7 @@ The above command will create a folder in your current directory called `my-site
 ## Options
 
 - `--with-trellis`: Set up the project with [Trellis](https://roots.io/trellis/) for deployment.
+- `--with-hatchet`: Also install the [Hatchet CLI](https://github.com/Rareloop/hatchet) tool.
 
 ## Verbosity
 
