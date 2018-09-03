@@ -139,7 +139,7 @@ class NewCommand extends Command
         ];
 
         if ($this->installHatchet) {
-            $dependencies[] = 'rareloop/hatchet:dev-master@dev';
+            $dependencies[] = 'rareloop/hatchet:^1.0.1';
         }
 
         return $dependencies;
