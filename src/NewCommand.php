@@ -101,6 +101,7 @@ class NewCommand extends Command
         $this->installComposerDependencies();
         $this->checkoutLatestLumberjackTheme();
         $this->addAdditionalDotEnvKeys();
+        $this->createLocalDotEnvFile();
         $this->registerServiceProviders();
         $this->removeGithubFolder();
 
@@ -203,6 +204,13 @@ class NewCommand extends Command
         foreach ($this->getDotEnvLines() as $line) {
             fwrite($file, $line);
         }
+    }
+
+    protected function createLocalDotEnvFile()
+    {
+        $this->output->writeln('<info>Creating .env</info>');
+
+        copy($this->projectPath . '/.env.example', $this->projectPath . '/.env');
     }
 
     protected function registerServiceProviders()
