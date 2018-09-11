@@ -176,7 +176,7 @@ class NewCommand extends Command
 
         $this->runCommands($commands, function ($type, $buffer) {
             // print when in verbose mode -v
-            $this->output->write($buffer, OutputInterface::VERBOSITY_VERBOSE);
+            $this->output->write($buffer, false, OutputInterface::VERBOSITY_VERBOSE);
         });
     }
 
