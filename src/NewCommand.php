@@ -23,6 +23,7 @@ class NewCommand extends Command
     protected $output;
 
     protected $defaultFolderName = 'lumberjack-bedrock-site';
+    protected $projectFolderName;
     protected $themeDirectory;
 
     protected $name = 'new';
@@ -59,10 +60,10 @@ class NewCommand extends Command
         $this->input = $input;
         $this->output = $output;
 
-        $projectFolderName = $input->getArgument('name') ?? $this->defaultFolderName;
+        $this->projectFolderName = $input->getArgument('name') ?? $this->defaultFolderName;
 
-        $this->rootPath = getcwd() . '/' . $projectFolderName;
-        $this->projectPath = getcwd() . '/' . $projectFolderName;
+        $this->rootPath = getcwd() . '/' . $this->projectFolderName;
+        $this->projectPath = getcwd() . '/' . $this->projectFolderName;
 
         $this->installHatchet |= $input->getOption('with-hatchet');
         $this->installTrellis |= $input->getOption('with-trellis');
