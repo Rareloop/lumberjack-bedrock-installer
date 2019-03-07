@@ -228,9 +228,17 @@ class NewCommand extends Command
 
         $appConfig = file_get_contents($configPath);
 
+        // Find the block of providers config
+        // 'providers' => [
+        //     ...
+        // ],
         preg_match("/'providers' => \[.*?\]/s", $appConfig, $matches);
         $providersConfig = $matches[0];
-        preg_match_all('/[A-Za-z0-9\_\\\]+\:\:class/', $appConfig, $currentProviders);
+
+        // Find all the classes inside the providers block
+        preg_match_all('/[A-Za-z0-9\_\\\]+\:\:class/', $providersConfig, $currentProviders);
+
+        // Get the last defined provider and add all new providers below it
         $lastProvider = $currentProviders[0][count($currentProviders[0]) - 1];
         $newProvidersConfig = str_replace($lastProvider, $lastProvider . ",\n        " . implode(",\n        ", $providers), $providersConfig);
         $appConfig = str_replace($providersConfig, $newProvidersConfig, $appConfig);
