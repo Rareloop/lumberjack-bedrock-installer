@@ -111,7 +111,8 @@ class NewCommand extends Command
         }
     }
 
-    protected function copyHatchetScript() {
+    protected function copyHatchetScript()
+    {
         $this->output->writeln('<info>Install Hatchet CLI</info>');
 
         $this->runCommands([
@@ -126,7 +127,7 @@ class NewCommand extends Command
         ]);
     }
 
-    protected function getDotEnvLines() : array
+    protected function getDotEnvLines(): array
     {
         return [
             "\n",
@@ -134,7 +135,7 @@ class NewCommand extends Command
         ];
     }
 
-    protected function getComposerDependencies() : array
+    protected function getComposerDependencies(): array
     {
         $dependencies = [
             'rareloop/lumberjack-core',
@@ -147,7 +148,7 @@ class NewCommand extends Command
         return $dependencies;
     }
 
-    protected function getServiceProviders() : array
+    protected function getServiceProviders(): array
     {
         return [];
     }
@@ -156,14 +157,14 @@ class NewCommand extends Command
     {
         $this->output->writeln('<info>Checking out Bedrock</info>');
 
-        $this->cloneGitRepository('git@github.com:roots/bedrock.git', $this->projectPath);
+        $this->cloneGitRepository('https://github.com/roots/bedrock.git', $this->projectPath);
     }
 
     protected function checkoutLatestTrellis()
     {
         $this->output->writeln('<info>Checking out Trellis</info>');
 
-        $this->cloneGitRepository('git@github.com:roots/trellis.git', $this->trellisPath);
+        $this->cloneGitRepository('https://github.com/roots/trellis.git', $this->trellisPath);
     }
 
     protected function installComposerDependencies()
@@ -185,7 +186,7 @@ class NewCommand extends Command
     {
         $this->output->writeln('<info>Adding Lumberjack theme</info>');
 
-        $this->cloneGitRepository('git@github.com:rareloop/lumberjack.git', $this->themeDirectory);
+        $this->cloneGitRepository('https://github.com/Rareloop/lumberjack.git', $this->themeDirectory);
     }
 
     protected function cloneGitRepository($gitRepo, $filePath)
