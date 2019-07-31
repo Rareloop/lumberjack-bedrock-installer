@@ -8,6 +8,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Process\Process;
 
 class NewCommand extends Command
@@ -81,6 +82,7 @@ class NewCommand extends Command
         }
 
         try {
+            $this->checkForUpdates();
             $this->install();
         } catch (Exception $e) {
             $output->writeln('<error>Install failed</error>');
@@ -89,6 +91,81 @@ class NewCommand extends Command
             // print in debug mode -vvv
             $output->writeln($e->getTraceAsString(), OutputInterface::VERBOSITY_DEBUG);
         }
+    }
+
+    protected function checkForUpdates()
+    {
+        $this->output->writeln('<info>Checking for updates...</info>');
+        try {
+            $requiredPackagesThatHaveUpdates = $this->requiredPackagesThatHaveUpdates();
+        } catch (Exception $e) {
+            $this->output->writeln('<comment>Could not check for updates, maybe `composer` is not in your path?</comment>');
+            return;
+        }
+
+        if (count($requiredPackagesThatHaveUpdates) === 0) {
+            $this->output->writeln('<comment>You are using the latest version of the installer</comment>');
+            return;
+        }
+
+        $this->output->writeln('<comment>The following updates are available for your installer:</comment>');
+
+        foreach ($requiredPackagesThatHaveUpdates as $package) {
+            $this->output->writeln('- ' . $package->name . ' <comment>' . $package->version . '</comment> => <info>' . $package->latest . '</info>');
+        }
+
+        $helper = $this->getHelper('question');
+        $question = new ConfirmationQuestion('<question>Are you sure you want to continue with the install?</question> [y/n] ', false);
+
+        $this->output->writeln('');
+
+        if (!$helper->ask($this->input, $this->output, $question)) {
+            $this->output->writeln('');
+            $this->output->writeln('<comment>Install cancelled. To update your installer packages run:</comment>');
+            $this->output->writeln('composer global update');
+            $this->output->writeln('');
+
+            exit;
+        }
+    }
+
+    protected function requiredPackagesThatHaveUpdates() : array
+    {
+        $process = new Process('composer global outdated -D -f json');
+
+        $output = null;
+
+        $result = $process->mustRun(function ($type, $buffer) use (&$output) {
+            if ($type === Process::OUT) {
+                $output = $buffer;
+            }
+        });
+
+        $globalPackagesThatHaveUpdates = @json_decode($output);
+
+        if (!$globalPackagesThatHaveUpdates || !isset($globalPackagesThatHaveUpdates->installed)) {
+            return [];
+        }
+
+        $packagesToCheck = $this->packagesToCheckForUpdates();
+        $requiredPackagesThatHaveUpdates = [];
+
+        foreach ($packagesToCheck as $packageName) {
+            foreach ($globalPackagesThatHaveUpdates->installed as $updatablePackage) {
+                if ($updatablePackage->name === $packageName) {
+                    $requiredPackagesThatHaveUpdates[] = $updatablePackage;
+                }
+            }
+        }
+
+        return $requiredPackagesThatHaveUpdates;
+    }
+
+    protected function packagesToCheckForUpdates() : array
+    {
+        return [
+            'rareloop/rareloop-pebble-installer',
+        ];
     }
 
     protected function install()
