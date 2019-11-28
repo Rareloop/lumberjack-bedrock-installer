@@ -129,7 +129,7 @@ class NewCommand extends Command
         }
     }
 
-    protected function requiredPackagesThatHaveUpdates() : array
+    protected function requiredPackagesThatHaveUpdates(): array
     {
         $process = new Process('composer global outdated -D -f json');
 
@@ -161,7 +161,7 @@ class NewCommand extends Command
         return $requiredPackagesThatHaveUpdates;
     }
 
-    protected function packagesToCheckForUpdates() : array
+    protected function packagesToCheckForUpdates(): array
     {
         return [
             'rareloop/lumberjack-bedrock-installer',
@@ -324,7 +324,7 @@ class NewCommand extends Command
         file_put_contents($configPath, $appConfig);
     }
 
-    protected function runCommands(array $commands, callable $callback = null)
+    protected function runCommands(array $commands, callable $callback = null, $timeout = 3600)
     {
         foreach ($commands as $command) {
             // print when in debug mode -vvv
@@ -332,6 +332,8 @@ class NewCommand extends Command
         }
 
         $process = new Process(implode(' && ', $commands));
+
+        $process->setTimeout($timeout);
 
         return $process->mustRun($callback);
     }
