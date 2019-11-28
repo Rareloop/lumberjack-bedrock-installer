@@ -164,7 +164,7 @@ class NewCommand extends Command
     protected function packagesToCheckForUpdates() : array
     {
         return [
-            'rareloop/rareloop-pebble-installer',
+            'rareloop/lumberjack-bedrock-installer',
         ];
     }
 
