@@ -266,11 +266,17 @@ class NewCommand extends Command
         $this->cloneGitRepository('https://github.com/Rareloop/lumberjack.git', $this->themeDirectory);
     }
 
-    protected function cloneGitRepository($gitRepo, $filePath)
+    protected function cloneGitRepository($gitRepo, $filePath, $branch = null)
     {
+        $cloneCommand = 'git clone --depth=1 ' . escapeshellarg($gitRepo) . ' ' . escapeshellarg($filePath);
+
+        if ($branch) {
+            $cloneCommand .= ' -b ' . escapeshellarg($branch);
+        }
+
         $this->runCommands([
-            'git clone --depth=1 ' . escapeshellarg($gitRepo) . ' ' . escapeshellarg($filePath),
-            'rm -rf ' . escapeshellarg($filePath . '/.git'),
+            $cloneCommand,
+            'rm -rf ' . escapeshellarg($filePath . '/.git')
         ]);
     }
 
