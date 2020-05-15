@@ -300,15 +300,18 @@ class NewCommand extends Command
 
     protected function registerServiceProviders()
     {
-        $providers = $this->getServiceProviders();
+        $this->addServiceProviders($this->getServiceProviders());
+    }
 
+    protected function addServiceProviders(array $providers)
+    {
         if (empty($providers)) {
             return;
         }
 
         $this->output->writeln('<info>Registering ServiceProviders</info>');
 
-        $configPath = $this->projectPath . '/web/app/themes/lumberjack/config/app.php';
+        $configPath = $this->themeDirectory . '/config/app.php';
 
         $appConfig = file_get_contents($configPath);
 
