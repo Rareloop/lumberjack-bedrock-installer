@@ -56,7 +56,7 @@ class NewCommand extends Command
         );
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->input = $input;
         $this->output = $output;
@@ -78,7 +78,7 @@ class NewCommand extends Command
 
         if (file_exists($this->projectPath)) {
             $output->writeln('<error>Can\'t install to: ' . $this->projectPath . '. The directory already exists</error>');
-            return;
+            return Command::FAILURE;
         }
 
         try {
@@ -91,6 +91,8 @@ class NewCommand extends Command
             // print in debug mode -vvv
             $output->writeln($e->getTraceAsString(), OutputInterface::VERBOSITY_DEBUG);
         }
+
+        return Command::SUCCESS;
     }
 
     protected function checkForUpdates()
@@ -131,7 +133,7 @@ class NewCommand extends Command
 
     protected function requiredPackagesThatHaveUpdates(): array
     {
-        $process = new Process('composer global outdated -D -f json');
+        $process = new Process(['composer', 'global', 'outdated', '-D', '-f', 'json']);
 
         $output = null;
 
@@ -340,7 +342,7 @@ class NewCommand extends Command
             $this->output->writeln('<comment>' . $command . '</comment>', OutputInterface::VERBOSITY_DEBUG);
         }
 
-        $process = new Process(implode(' && ', $commands));
+        $process = Process::fromShellCommandline(implode(' && ', $commands));
 
         $process->setTimeout($timeout);
 
